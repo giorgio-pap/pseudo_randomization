@@ -4,12 +4,6 @@ Created on Tue Feb 11 16:34:38 2020
 
 @author: papitto
 """
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Feb 11 16:34:38 2020
-
-@author: papitto
-"""
 
 import pandas as pd
 from zipfile import ZipFile
