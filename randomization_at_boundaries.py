@@ -4,13 +4,69 @@ Created on Tue Feb 11 16:34:38 2020
 
 @author: papitto
 """
-
 import pandas as pd
 from zipfile import ZipFile
 import shutil, os
+import random
+import numpy as np
+
+randomized = False
+randomized_2 = False
+
+while not randomized and not randomized_2: 
+    x1=[2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6] # possible duration of a jitter
+    x1 = np.repeat(x1,26)
+       
+    x_r_1 = random.sample(x1, 228) # fixation cross
+    x_r_2 = random.sample(x1, 228) # inter cue interval (ICI)
+    
+    df_1 = pd.DataFrame({'Freq_1': x_r_1})
+    df_2 = pd.DataFrame({'Freq_2': x_r_2}) # ICI
+    
+    merged_jitters = pd.concat([df_1, df_2], axis=1) #make a new dataframe 
+            
+    jitters_fix = merged_jitters['Freq_1']
+    jitters_ICI = merged_jitters['Freq_2']
+        
+    x_r_1 = jitters_fix.tolist()
+    random.shuffle(x_r_1)
+    x_r_2 = jitters_ICI.tolist()
+    random.shuffle(x_r_2)
+        
+    chunk_fill_spec = x_r_1[0:12]
+    chunk_fill_sub = x_r_1[12:24]
+    chunk_fill_rule = x_r_1[24:36]
+    chunk_spec = x_r_1[36:84]
+    chunk_sub = x_r_1[84:132]
+    chunk_rule = x_r_1[132:180]
+    chunk_gen = x_r_1[180:228]
+    
+    
+    if (sum(chunk_rule) and sum(chunk_spec) and sum(chunk_sub) and sum(chunk_gen) > 180) and (sum(chunk_rule) and sum(chunk_spec) and sum(chunk_sub) and sum(chunk_gen) < 200):
+        print("ok_1")
+        randomized = True
+    elif (sum(chunk_rule) or sum(chunk_spec) or sum(chunk_sub) or sum(chunk_gen) <= 180) or (sum(chunk_rule) or sum(chunk_spec) or sum(chunk_sub) or sum(chunk_gen) >= 200):
+        print("no")
+        ranomized = False
+
+
+    chunk_fill_spec_2 = x_r_2[0:12]
+    chunk_fill_sub_2 = x_r_2[12:24]
+    chunk_fill_rule_2 = x_r_2[24:36]
+    chunk_spec_2 = x_r_2[36:84]
+    chunk_sub_2 = x_r_2[84:132]
+    chunk_rule_2 = x_r_2[132:180]
+    chunk_gen_2 = x_r_2[180:228]        
+    
+    if (sum(chunk_rule_2) and sum(chunk_spec_2) and sum(chunk_sub_2) and sum(chunk_gen_2) > 180) and (sum(chunk_rule_2) and sum(chunk_spec_2) and sum(chunk_sub_2) and sum(chunk_gen_2) < 200):
+        print("ok_2")
+        randomized_2 = True
+    elif (sum(chunk_rule_2) or sum(chunk_spec_2) or sum(chunk_sub_2) or sum(chunk_gen_2) <= 180) or (sum(chunk_rule_2) or sum(chunk_spec_2) or sum(chunk_sub_2) or sum(chunk_gen_2) >= 200):
+        print("no_2")
+        ranomized_2 = False
+
 
 # participant information - type in
-
 group_info = raw_input("What is the subject GROUP?") 
 type(group_info)
 
@@ -31,6 +87,7 @@ while (looping == 0):
     df_all_possible_trials = pd.read_excel('Group' + group_info + n_dataset + '.xlsx')
     
     #extract filler trials
+         
     df_filler_rule = df_all_possible_trials.loc[df_all_possible_trials['conditions'] == "fill_rule"]
     df_filler_sub_rule = df_all_possible_trials.loc[df_all_possible_trials['conditions'] == "fill_sub_rule"]
     df_filler_spec = df_all_possible_trials.loc[df_all_possible_trials['conditions'] == "fill_spec"]
@@ -105,17 +162,29 @@ while (looping == 0):
             x = x+38 
         elif (df_1['numbers_pr'][x] == df_2['numbers_pr'][0]) or ((df_1['color1expl'][x] == df_2['color1expl'][0]) and (df_1['color1expl'][x] == df_2['color1expl'][1])) or ((df_1['color2expl'][x] == df_2['color2expl'][0]) and (df_1['color2expl'][x] == df_2['color2expl'][1])):
             break    
-    
-    #print(x)
-    
+       
+      
     if x >= y: #if there are at least 228 rows in the "total" file, stop and get the first rows
-        fObj1 = df_1_2.head(228)           
-        fObj1.to_excel("Group" + group_info + "_" + subj_info + "_total.xlsx", index=False) #creates a new excel from the concatenated dataframe
+        fObj1 = df_1_2.head(228) 
         looping = 1 
-        #print("done")
+        print("done")
     else:
         #print("restart")
-        continue   
+        continue  
+
+class ReplaceWithNext:
+    def __init__(self, **kwargs):
+        self.lookup = {k: iter(v) for k, v in kwargs.items()}
+    def __call__(self, value):
+        return next(self.lookup[value])
+    
+
+fObj1['Jitter_Fix'] = fObj1['conditions'].apply(ReplaceWithNext(spec=chunk_spec, subrule=chunk_sub, rule=chunk_rule, general=chunk_gen, 
+     fill_spec=chunk_fill_spec, fill_sub_rule=chunk_fill_sub, fill_rule=chunk_fill_rule))
+fObj1['Jitter_ICI'] = fObj1['conditions'].apply(ReplaceWithNext(spec=chunk_spec_2, subrule=chunk_sub_2, rule=chunk_rule_2, general=chunk_gen_2, 
+     fill_spec=chunk_fill_spec_2, fill_sub_rule=chunk_fill_sub_2, fill_rule=chunk_fill_rule_2))
+    
+fObj1.to_excel("Group" + group_info + "_" + subj_info + "_total.xlsx", index=False) #creates a new excel from the concatenated dataframe
 
  # create a ZipFile object
 zipObj = ZipFile("Group" + group_info + "_" + subj_info + ".zip", 'w')
@@ -140,4 +209,4 @@ for iterations_3 in range(0,13):
     file_int += 1
     file_str = str(file_int)
     os.remove("Group" + group_info + "_r" + file_str + '.xlsx')
-os.remove("Group" + group_info + "_total.xlsx")    
+os.remove("Group" + group_info + "_total.xlsx")  
