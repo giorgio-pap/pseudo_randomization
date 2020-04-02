@@ -183,6 +183,10 @@ fObj1['Jitter_Fix'] = fObj1['conditions'].apply(ReplaceWithNext(spec=chunk_spec,
      fill_spec=chunk_fill_spec, fill_sub_rule=chunk_fill_sub, fill_rule=chunk_fill_rule))
 fObj1['Jitter_ICI'] = fObj1['conditions'].apply(ReplaceWithNext(spec=chunk_spec_2, subrule=chunk_sub_2, rule=chunk_rule_2, general=chunk_gen_2, 
      fill_spec=chunk_fill_spec_2, fill_sub_rule=chunk_fill_sub_2, fill_rule=chunk_fill_rule_2))
+
+for i, row in fObj1.iterrows():
+    fObj1.at[i, 'img_fix_1'] = "cues/fix_1.png"
+    fObj1.at[i, 'img_fix_2'] = "cues/fix_2.png"
     
 fObj1.to_excel("Group" + group_info + "_" + subj_info + "_total.xlsx", index=False) #creates a new excel from the concatenated dataframe
 
