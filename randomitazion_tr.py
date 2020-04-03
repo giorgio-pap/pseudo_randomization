@@ -7,7 +7,8 @@ Created on Fri Apr  3 11:10:44 2020
 """
 import pandas as pd
 from zipfile import ZipFile
-import os, shutil
+
+#if using PY3 change raw_input to input
 
 group_info = raw_input("What is the subject GROUP?") 
 type(group_info)
@@ -65,6 +66,17 @@ for iterations in range(0,12):
                     break    
             except KeyError:
                 pass
+    
+
+    class ReplaceWithNext:
+        def __init__(self, **kwargs):
+            self.lookup = {k: iter(v) for k, v in kwargs.items()}
+        def __call__(self, value):
+            return next(self.lookup[value])
+    
+    for i, row in experimental_df_2.iterrows():
+        experimental_df_2.at[i, 'img_fix_1'] = "cues/fix_1.png"
+        experimental_df_2.at[i, 'img_fix_2'] = "cues/fix_2.png"
     
     #export the excel file
     experimental_df_2.to_excel("participants_trials/" +'Group' + group_info + n_dataset + "_" + subj_info + '.xlsx', index=False) #creates a new excel from the concatenated dataframe                                       
