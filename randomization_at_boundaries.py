@@ -4,6 +4,9 @@ Created on Tue Feb 11 16:34:38 2020
 
 @author: papitto
 """
+
+#this is only for the lab-version of psychopy
+
 import pandas as pd
 from zipfile import ZipFile
 import shutil, os
